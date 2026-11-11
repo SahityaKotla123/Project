@@ -4,7 +4,7 @@ This is a small, dependency-free demo of a conversational insurance claims suppo
 
 ## Live Demo
 
-[Open the Insurance Claims SOP Agent](https://project-exud.onrender.com)
+[Insurance Claims SOP Agent](https://project-exud.onrender.com)
 The demo supports identity verification, intent resolution, grounded claim processing, and post-case email-summary consent.
 
 ## What is included
