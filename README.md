@@ -57,6 +57,3 @@ The agent should verify Margaret with name, date of birth, and SSN last four, re
 python3 -m unittest discover -s tests -v
 ```
 
-## Submission
-
-Zip this project without `.venv`, `node_modules`, caches, or other installed dependencies. The project is intentionally self-contained and is under 50 MB.
