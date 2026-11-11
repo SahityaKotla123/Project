@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Insurance Claims SOP Demo</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, system-ui, sans-serif; }
+    body { margin: 0; background: #f4f6f8; color: #17202a; }
+    main { max-width: 820px; margin: 32px auto; padding: 0 18px; }
+    header { background: #15324b; color: white; border-radius: 14px 14px 0 0; padding: 22px 24px; }
+    h1 { margin: 0 0 6px; font-size: 1.35rem; }
+    header p { margin: 0; opacity: .82; }
+    #status { background: white; padding: 10px 24px; border-bottom: 1px solid #dbe1e6; font-size: .9rem; }
+    #chat { min-height: 390px; background: white; padding: 20px 24px; }
+    .message { max-width: 78%; padding: 11px 14px; border-radius: 12px; margin: 10px 0; white-space: pre-wrap; line-height: 1.4; }
+    .user { margin-left: auto; background: #dceeff; }
+    .agent { background: #edf0f2; }
+    form { display: flex; gap: 10px; background: white; padding: 16px 24px 22px; border-radius: 0 0 14px 14px; }
+    input { flex: 1; border: 1px solid #b8c2cc; border-radius: 9px; padding: 12px; font-size: 1rem; }
+    button { border: 0; border-radius: 9px; padding: 0 18px; background: #1976d2; color: white; font-weight: 600; cursor: pointer; }
+    .reset { margin-top: 12px; background: transparent; color: #315a78; padding: 0; }
+  </style>
+</head>
+<body>
+<main>
+  <header><h1>Insurance Claims SOP Agent</h1><p>Conversational support with protected workflow gates</p></header>
+  <div id="status">Phase: VERIFY_ID · Not verified</div>
+  <section id="chat" aria-live="polite"><div class="message agent">Hello. I can help with an insurance claim. Before I share claim details, I’ll need to verify your identity using three matching details.</div></section>
+  <form id="form"><input id="message" autocomplete="off" placeholder="Type a message…" required><button>Send</button></form>
+  <button class="reset" id="reset" type="button">Start a new test session</button>
+</main>
+<script>
+  const sessionId = crypto.randomUUID();
+  const chat = document.querySelector('#chat');
+  const status = document.querySelector('#status');
+  function addMessage(text, who) {
+    const node = document.createElement('div');
+    node.className = `message ${who}`;
+    node.textContent = text;
+    chat.appendChild(node);
+    chat.scrollTop = chat.scrollHeight;
+  }
+  function updateStatus(data) {
+    status.textContent = `Phase: ${data.phase} · ${data.verified ? 'Identity verified' : 'Not verified'}${data.claim_id ? ` · Claim ${data.claim_id}` : ''}`;
+  }
+  document.querySelector('#form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const input = document.querySelector('#message');
+    const message = input.value.trim();
+    if (!message) return;
+    addMessage(message, 'user'); input.value = '';
+    const response = await fetch('/api/chat', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({session_id: sessionId, message}) });
+    const data = await response.json();
+    addMessage(data.reply || data.error, 'agent');
+    updateStatus(data);
+  });
+  document.querySelector('#reset').addEventListener('click', async () => {
+    await fetch('/api/reset', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({session_id: sessionId}) });
+    chat.innerHTML = '<div class="message agent">New session started. Please provide your identity details when ready.</div>';
+    status.textContent = 'Phase: VERIFY_ID · Not verified';
+  });
+</script>
+</body>
+</html>
